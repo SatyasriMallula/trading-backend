@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends
-from  app.core.database import wallets, db_paper
+from  app.core.database import wallets,positions
 from app.schemas.paper_trade import CreateWalletRequest
 from app.services.paper_wallet import PaperWallet
-from app.utils.response_message import response_message
+from app.utils.response_message import response_message, error_message
 from app.utils.serialize_doc import serialize_doc
 from app.core.auth import get_current_user
 from app.schemas.paper_trade import DepositRequest, WithdrawRequest
@@ -57,7 +57,7 @@ async def create_wallet(request: CreateWalletRequest, current_user: str = Depend
         )
         
     except Exception as e:
-        return response_message(
+        return error_message(
             code=500, 
             message=f"Failed to create wallet: {str(e)}", 
         )
@@ -97,7 +97,7 @@ async def deposit_funds(request: DepositRequest, current_user: str = Depends(get
         )
         
     except Exception as e:
-        return response_message(message=f"Deposit failed: {str(e)}", success=False)
+        return response_message(message=f"Deposit failed: {str(e)}")
 
 @wallet_router.post("/withdraw")
 async def withdraw_funds(request: WithdrawRequest, current_user: str = Depends(get_current_user)):
@@ -140,3 +140,11 @@ async def withdraw_funds(request: WithdrawRequest, current_user: str = Depends(g
         
     except Exception as e:
         return response_message(message=f"Withdrawal failed: {str(e)}")
+    
+
+@wallet_router.get("/positions/{user_id}")
+async def get_positions(user_id,current_user: str = Depends(get_current_user)):
+    response=await positions.find_one({"user_id":user_id})
+    return response_message(message="Positions fetched successfully",data=[serialize_doc(response)])
+
+

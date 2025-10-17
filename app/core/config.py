@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # JWT settings
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key")
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 300
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 3000
 
     # # Stripe settings
     # STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "sk_test_51R4hFWEi7L0cpUmSD625gUIerHKn2bUgsydMVdFM9AybFylVCnKiRj2OnqiRBwGWacir3fno3nHwzNOWFykKWY4J00amGLjWKO")

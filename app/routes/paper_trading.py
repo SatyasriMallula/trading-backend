@@ -15,7 +15,13 @@ async def log_trade(trade: Trade, current_user: str = Depends(get_current_user))
     trade_dict = trade.dict()
     await db_paper.get_collection("trades").insert_one(trade_dict)
     return response_message(message="Trade logged")
-
+@paper_router.get("/trading_state/{user_id}")
+async def get_trading_state(user_id: str):
+    try:
+        result = await trading_service.get_trading_state(user_id)
+        return result
+    except Exception as e:
+        return {"status": "error", "msg": str(e)}
 @paper_router.get("/trades/{user_id}")
 async def get_trades(user_id: str, current_user: str = Depends(get_current_user)):
     trades = await db_paper.trades.find({"user_id": user_id}).to_list(100)
@@ -49,11 +55,16 @@ async def start_paper_trading(body: PaperTrading, current_user: str = Depends(ge
         data=result
     )
 
+from pydantic import BaseModel
+
+class StopPaperTradingRequest(BaseModel):
+    user_id: str
+
 @paper_router.post("/stop_paper_trading")
-async def stop_paper_trading(user_id: str, current_user: str = Depends(get_current_user)):
+async def stop_paper_trading(body: StopPaperTradingRequest, current_user: str = Depends(get_current_user)):
     """MANUALLY stop paper trading"""
-    await trading_manager.stop_trading(user_id)
-    return response_message(message="Paper trading manually stopped", data={"user_id": user_id})
+    await trading_manager.stop_trading(body.user_id)
+    return response_message(message="Paper trading manually stopped", data={"user_id": body.user_id})
 
 @paper_router.get("/trading_status/{user_id}")
 async def get_trading_status(user_id: str, current_user: str = Depends(get_current_user)):
@@ -111,7 +122,6 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):
                 await websocket.send_json({
                     "type": "status_response",
                     "is_running": is_running,
-                    "has_price": current_state.get('price') is not None,
                     "has_candle": current_state.get('candle') is not None,
                     "last_update": current_state.get('last_update')
                 })

@@ -31,7 +31,7 @@ class TradingManager:
             await websocket.send_json({
                 "type": "connection_established",
                 "message": "Connected to running trading session",
-                "has_price": current_state.get('price') is not None,
+                # "has_price": current_state.get('price') is not None,
                 "has_candle": current_state.get('candle') is not None,
                 "last_update": current_state.get('last_update'),
                 "timestamp": datetime.utcnow().isoformat()
@@ -77,12 +77,12 @@ class TradingManager:
         """Stop trading only when explicitly requested"""
         if user_id in self.trading_tasks:
             tasks = self.trading_tasks[user_id]
-            tasks['price_task'].cancel()
+            # tasks['price_task'].cancel()
             tasks['candle_task'].cancel()
             
             try:
                 await asyncio.gather(
-                    tasks['price_task'],
+                    # tasks['price_task'],
                     tasks['candle_task'],
                     return_exceptions=True
                 )
@@ -108,7 +108,7 @@ class TradingManager:
     
     def update_trading_state(self, user_id: str, price=None, candle=None):
         if price is not None:
-            self.trading_state[user_id]['price'] = price
+            # self.trading_state[user_id]['price'] = price
             self.trading_state[user_id]['last_update'] = datetime.utcnow()
             
         if candle is not None:

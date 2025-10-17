@@ -18,7 +18,7 @@ async def login(request: LoginRequest):
     if request.username != fake_user["username"] or request.password != fake_user["password"]:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    access_token_expires = timedelta(minutes=15)
+    access_token_expires = timedelta(minutes=1500)
     access_token = create_access_token(
         data={"sub": request.username}, expires_delta=access_token_expires
     )
